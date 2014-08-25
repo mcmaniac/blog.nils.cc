@@ -57,8 +57,9 @@ renderPage page = H.docTypeHtml $ do
 
   H.head $ do
 
-    H.title $ toMarkup $
-      (page ^. pageTitle) `Text.append` (page ^. pageName & maybe "" (" - " `Text.append`))
+    H.title $ do
+      toMarkup $ page ^. pageTitle
+      toMarkup $ maybe "" (" - " `Text.append`) (page ^. pageName)
 
     -- load javascript
     forM_ (page ^. pageScripts) $ \s ->

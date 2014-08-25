@@ -14,6 +14,7 @@ import Html.Index
 
 import Session
 import State
+import Routes
 
 main :: IO ()
 main = do
@@ -36,29 +37,11 @@ main = do
 
 mainRoute :: ServerT Response
 mainRoute = msum
-  [ dir "api"    $ apiRoute
-  , dir "static" $ serveDirectory DisableBrowsing ["index.html"] "static"
+  [ dir "static" $ serveDirectory DisableBrowsing ["index.html"] "static"
+  , dir "api"    $ apiRoute
   , pageRoute
   , notFoundResponse
   ]
-
---
--- Html pages
---
-
-pageRoute :: ServerT Response
-pageRoute = msum
-  [ do nullDir
-       uid <- getUserID
-       ok $ toResponse $ indexPage (recentPosts uid)
-  ]
-
---
--- JS api
---
-
-apiRoute :: ServerT Response
-apiRoute = mzero
 
 --
 -- Error responses

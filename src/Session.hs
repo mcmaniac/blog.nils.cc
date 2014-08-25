@@ -17,7 +17,7 @@ import Happstack.Server.ClientSession
 import State
 import State.Users
 
-type ServerT a = ReaderT (AcidState BlogState) (ClientSessionT SessionData (ServerPartT IO)) a
+type ServerT a = ClientSessionT SessionData AcidServerT a
 
 runServerT
   :: (Key -> SessionConf)
@@ -34,7 +34,7 @@ runServerT'
   -> ServerT a
   -> ServerPart a
 runServerT' acid sconf srvt =
-  withClientSessionT sconf $ runReaderT srvt acid
+  runReaderT (withClientSessionT sconf srvt) acid
 
 --
 -- Type definition
@@ -60,3 +60,8 @@ getUserID = liftSessionStateT $ use sessionUser
 
 setUserID :: Maybe UserID -> ServerT ()
 setUserID mid = liftSessionStateT $ sessionUser .= mid
+
+getSessionUser :: ServerT (Maybe User)
+getSessionUser = do
+  muid  <- getUserID
+  maybe (return Nothing) (runQuery . GetUserById) muid

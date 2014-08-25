@@ -1,6 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module Html.Index where
+module Html.Install where
 
 -- lens package
 import Control.Lens
@@ -11,20 +11,17 @@ import Text.Blaze.Html (Html, (!), toValue)
 import qualified Text.Blaze.Html5               as H
 import qualified Text.Blaze.Html5.Attributes    as A
 
--- our modules
-import Html.Helper
+-- local modules
 import Html.Base
 
-indexPage :: HtmlPage
-indexPage = basePage
-  & pageName  .~ Just "Home"
+installPage :: HtmlPage
+installPage = basePage
+  & pageName  .~ Just "Install"
   & pageBody  .~ do
 
-    H.p "ok"
+    installHtml
 
-recentPosts :: Maybe Int -> Html
-recentPosts uid = do
+installHtml :: Html
+installHtml = do
 
-  H.p $ do
-    "Current UserID: "
-    show uid ^. markup
+  H.h1 "Welcome!"
