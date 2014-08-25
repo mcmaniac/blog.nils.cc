@@ -17,6 +17,9 @@ import Text.Blaze.Html (Html, (!), toValue)
 import qualified Text.Blaze.Html5               as H
 import qualified Text.Blaze.Html5.Attributes    as A
 
+-- happstack packages
+import Happstack.Server.Response
+
 -- our modules
 import Html.Helper
 
@@ -75,3 +78,7 @@ renderPage page = H.docTypeHtml $ do
   H.body $ do
 
     page ^. pageBody
+
+instance ToMessage HtmlPage where
+  toContentType _ = toContentType (mempty :: Html)
+  toMessage     p = toMessage $ renderPage p

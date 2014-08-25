@@ -4,7 +4,7 @@ module Html.Helper where
 import Control.Lens
 
 -- blaze-html package
-import Text.Blaze
+import Text.Blaze.Html
 
 -- | Lens for generating `Markup` type
 markup :: ToMarkup a => Getter a Markup
