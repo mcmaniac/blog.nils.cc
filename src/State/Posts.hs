@@ -13,7 +13,7 @@ import Data.SafeCopy
 import Data.IxSet as IxS
 
 -- my modules
-import State.HElper
+import State.Helper
 
 --
 -- Post
@@ -29,11 +29,20 @@ makeLenses ''Content
 
 deriveSafeCopy 0 'base ''Content
 
+data Visibility
+  = Public
+  | Private
+  | Trashed
+  deriving (Eq, Ord, Typeable, Data, Show)
+
+deriveSafeCopy 0 'base ''Visibility
+
 data Post = Post
   { _postTitle          :: Text
   , _postPublishTime    :: UTCTime      -- ^ indexed
   , _postFilePath       :: FilePath     -- ^ indexed
   , _postContent        :: [Content]
+  , _postVisibility     :: Visibility
   }
   deriving (Eq, Ord, Typeable, Data, Show)
 

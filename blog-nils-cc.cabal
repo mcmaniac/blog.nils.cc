@@ -27,8 +27,11 @@ executable blog-nils-cc
 
   build-depends: 
     base >=4.7 && <4.8,
-    mtl,
+    mtl, bytestring, time,
     text,
-    happstack-server,
+    scrypt,
+    happstack-server, happstack-clientsession,
+    safecopy, acid-state,
+    ixset,
     blaze-html,
     lens

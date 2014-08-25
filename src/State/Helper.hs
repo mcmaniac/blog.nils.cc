@@ -7,6 +7,10 @@ import Control.Lens
 import Data.Typeable
 import Data.IxSet as IxS
 
+--
+-- IxSet helper
+--
+
 ixSetAt
   :: (Typeable k, Typeable a, IxS.Indexable a, Ord a)
   => k
@@ -18,3 +22,5 @@ ixSetAt key = lens
     Nothing -> deleteIx key   db
   )
 
+list :: (Ord a, Typeable a, IxS.Indexable a) => Iso' (IxSet a) [a]
+list = iso toList fromList

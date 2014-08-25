@@ -6,18 +6,35 @@ import Control.Monad.Error
 
 -- happstack package
 import Happstack.Server
+import Happstack.Server.ClientSession
 
 -- html pages
 import Html.Error
 import Html.Index
 
+import Session
+import State
+
 main :: IO ()
 main = do
-  simpleHTTP conf $ mainRoute `catchError` internalServerErrorResponse
- where
-  conf = nullConf { port = 8686 }
 
-mainRoute :: ServerPart Response
+  simpleHTTP hsconf $ runServerT sessionconf $
+    mainRoute `catchError` internalServerErrorResponse
+
+ where
+
+  -- happstack config
+  hsconf = nullConf { port = 8686 }
+
+  -- session config
+  sessionconf key = (mkSessionConf key)
+    { sessionCookieLife = oneMonth
+    , sessionCookieName = "blog.user.session"
+    }
+
+  oneMonth        = MaxAge $ 60 * 60 * 24 * 7 * 4
+
+mainRoute :: ServerT Response
 mainRoute = msum
   [ dir "api"    $ apiRoute
   , dir "static" $ serveDirectory DisableBrowsing ["index.html"] "static"
@@ -29,26 +46,27 @@ mainRoute = msum
 -- Html pages
 --
 
-pageRoute :: ServerPart Response
+pageRoute :: ServerT Response
 pageRoute = msum
   [ do nullDir
-       ok $ toResponse $ indexPage (return ())
+       uid <- getUserID
+       ok $ toResponse $ indexPage (recentPosts uid)
   ]
 
 --
 -- JS api
 --
 
-apiRoute :: ServerPart Response
+apiRoute :: ServerT Response
 apiRoute = mzero
 
 --
 -- Error responses
 --
 
-internalServerErrorResponse :: IOException -> ServerPart Response
+internalServerErrorResponse :: IOException -> ServerT Response
 internalServerErrorResponse =
   internalServerError . toResponse . page500InternalError
 
-notFoundResponse :: ServerPart Response
+notFoundResponse :: ServerT Response
 notFoundResponse = notFound $ toResponse $ page404NotFound
