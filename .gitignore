@@ -1,4 +1,6 @@
 dist/
 *.swp
 *.swo
+*~
+*.aes
 .hs_tags
