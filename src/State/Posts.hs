@@ -10,7 +10,10 @@ import Data.Data (Data, Typeable)
 import Data.Time
 import Data.Text (Text)
 import Data.SafeCopy
-import Data.IxSet
+import Data.IxSet as IxS
+
+-- my modules
+import State.HElper
 
 --
 -- Post
@@ -58,12 +61,5 @@ recentPosts
 recentPosts offset limit = to $
   take limit . drop offset . toDescList (Proxy :: Proxy UTCTime)
 
-postAt
-  :: FilePath
-  -> Lens' PostDB (Maybe Post)
-postAt fp = lens
-  (fmap (postFilePath .~ fp) . getOne . (@= fp))
-  (\db k -> case k of
-    Just p  -> updateIx fp (p & postFilePath .~ fp) db
-    Nothing -> deleteIx fp db
-  )
+postAt :: FilePath -> Lens' PostDB (Maybe Post)
+postAt = ixSetAt

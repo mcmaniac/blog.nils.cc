@@ -1,23 +1,20 @@
 {-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE DeriveDataTypeable #-}
+{-# LANGUAGE RankNTypes #-}
 
 module State.Users where
 
-import Data.Typeable
-import Data.IntMap
-import Data.ByteString (ByteString)
-
--- lens
 import Control.Lens
 
--- text
-import Data.Text (Text)
+import Crypto.Scrypt
 
--- safecopy
+import Data.Data
+import Data.ByteString (ByteString)
+import Data.IxSet
+import Data.Text (Text)
 import Data.SafeCopy
 
--- scrypt
-import Crypto.Scrypt
+import State.Helper
 
 --
 -- User
@@ -32,7 +29,7 @@ data User = User
   , _userName      :: Text
   , _userPwd       :: ByteString
   }
-  deriving (Eq, Ord, Typeable)
+  deriving (Eq, Ord, Typeable, Data)
 
 makeLenses ''User
 
@@ -54,8 +51,14 @@ encrypted = lens EncryptedPass (const getEncryptedPass)
 -- Lookup map
 --
 
-newtype UserDB = UserDB { _userDB :: IntMap User }
+inferIxSet "UserDB" ''User 'noCalcs
+  [ ''UserID
+  , ''Text
+  ]
 
-makeLenses ''UserDB
+--
+-- Lenses
+--
 
-deriveSafeCopy 0 'base ''UserDB
+userAt :: UserID -> Lens' UserDB (Maybe User)
+userAt = ixSetAt
