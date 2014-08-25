@@ -1,5 +1,5 @@
-{-# Language OverloadedStrings #-}
-{-# Language TemplateHaskell #-}
+{-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE TemplateHaskell #-}
 
 module Html.Base where
 
@@ -7,13 +7,13 @@ import Data.Monoid
 import Control.Monad
 
 -- text package
-import Data.Text
+import Data.Text as Text
 
 -- lens package
 import Control.Lens
 
 -- blaze-html package
-import Text.Blaze.Html (Html, (!), toValue)
+import Text.Blaze.Html (Html, (!), toMarkup, toValue)
 import qualified Text.Blaze.Html5               as H
 import qualified Text.Blaze.Html5.Attributes    as A
 
@@ -31,6 +31,7 @@ type Link = (Text, Text, Text)
 
 data HtmlPage = HtmlPage
   { _pageTitle   :: Text
+  , _pageName    :: Maybe Text
   , _pageScripts :: [FilePath]
   , _pageStyles  :: [FilePath]
   , _pageLinks   :: [Link]
@@ -40,12 +41,11 @@ data HtmlPage = HtmlPage
 makeLenses ''HtmlPage
 
 emptyPage :: HtmlPage
-emptyPage = HtmlPage "" [] [] [] mempty
+emptyPage = HtmlPage "" Nothing [] [] [] mempty
 
 basePage :: HtmlPage
 basePage = emptyPage
   & pageTitle   .~ "blog.nils.cc"
-  & pageScripts .~ [ ]
   & pageStyles  .~ [ "base.css" ]
   & pageLinks   .~ [ ubuntuFont  ]
  where
@@ -57,7 +57,8 @@ renderPage page = H.docTypeHtml $ do
 
   H.head $ do
 
-    H.title $ page ^. pageTitle . markup
+    H.title $ toMarkup $
+      (page ^. pageTitle) `Text.append` (page ^. pageName & maybe "" (" - " `Text.append`))
 
     -- load javascript
     forM_ (page ^. pageScripts) $ \s ->

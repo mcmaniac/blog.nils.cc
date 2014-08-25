@@ -1,4 +1,4 @@
-{-# Language OverloadedStrings #-}
+{-# LANGUAGE OverloadedStrings #-}
 
 module Html.Error where
 
@@ -6,12 +6,11 @@ module Html.Error where
 import Control.Lens
 
 -- blaze-html package
-import Text.Blaze.Html (Html, (!), toValue)
+-- import Text.Blaze.Html (Html, (!), toValue)
 import qualified Text.Blaze.Html5               as H
-import qualified Text.Blaze.Html5.Attributes    as A
+-- import qualified Text.Blaze.Html5.Attributes    as A
 
 -- our modules
-import Html.Helper
 import Html.Base
 
 page404NotFound :: HtmlPage
