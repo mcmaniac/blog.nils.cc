@@ -27,6 +27,7 @@ executable blog-nils-cc
 
   build-depends: 
     base >=4.7 && <4.8,
+    mtl,
     text,
     happstack-server,
     blaze-html,

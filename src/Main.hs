@@ -1,6 +1,8 @@
 module Main where
 
+import Control.Exception
 import Control.Monad
+import Control.Monad.Error
 
 -- happstack package
 import Happstack.Server
@@ -11,7 +13,7 @@ import Html.Index
 
 main :: IO ()
 main = do
-  simpleHTTP conf mainRoute
+  simpleHTTP conf $ mainRoute `catchError` internalServerErrorResponse
  where
   conf = nullConf { port = 8686 }
 
@@ -43,6 +45,10 @@ apiRoute = mzero
 --
 -- Error responses
 --
+
+internalServerErrorResponse :: IOException -> ServerPart Response
+internalServerErrorResponse =
+  internalServerError . toResponse . page500InternalError
 
 notFoundResponse :: ServerPart Response
 notFoundResponse = notFound $ toResponse $ page404NotFound
