@@ -10,3 +10,4 @@ buildFooterHtml :: ServerT Html
 buildFooterHtml = do
 
   return $ footerHtml
+

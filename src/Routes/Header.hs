@@ -10,3 +10,4 @@ buildHeaderHtml :: ServerT Html
 buildHeaderHtml = do
 
   return $ headerHtml
+
