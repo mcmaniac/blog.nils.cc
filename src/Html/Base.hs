@@ -84,3 +84,14 @@ renderPage page = H.docTypeHtml $ do
 instance ToMessage HtmlPage where
   toContentType _ = toContentType (mempty :: Html)
   toMessage     p = toMessage $ renderPage p
+
+--
+-- HTML helper
+--
+
+input :: String -> String -> Text -> Html
+input name ty labl = do
+  H.label $ do
+    toMarkup $ labl
+    " "
+    H.input ! A.type_ (toValue ty) ! A.name (toValue name)

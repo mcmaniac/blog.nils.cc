@@ -47,12 +47,31 @@ emptyBlogState = BlogState
 getUserById :: UserID -> Query BlogState (Maybe User)
 getUserById uid = view $ users . userAt uid
 
+getConfig :: Query BlogState (Maybe Config)
+getConfig = view config
+
+--
+-- Update
+--
+
+setConfig :: Maybe Config -> Update BlogState ()
+setConfig c = config .= c
+
+setDefaultVisibility :: Visibility -> Update BlogState ()
+setDefaultVisibility v =
+  config . non defaultConfig . configDefaultVisibility .= v
+
 --
 -- Acid instance
 --
 
 makeAcidic ''BlogState
-  [ 'getUserById
+  [ -- queries
+    'getUserById
+  , 'getConfig
+    -- updates
+  , 'setConfig
+  , 'setDefaultVisibility
   ]
 
 --

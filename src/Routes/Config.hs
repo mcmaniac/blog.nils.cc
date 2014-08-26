@@ -1,5 +1,7 @@
 module Routes.Config where
 
+import Control.Monad
+
 import Text.Blaze.Html
 
 -- local
@@ -9,7 +11,4 @@ import Html.Base
 import Html.Config
 
 buildConfigPage :: ServerT HtmlPage
-buildConfigPage = do
-
-  return basePage
-
+buildConfigPage = mzero

@@ -1,5 +1,7 @@
 module Routes.Post where
 
+import Control.Monad
+
 import Text.Blaze.Html
 
 -- local
@@ -9,7 +11,4 @@ import Html.Base
 import Html.Post
 
 buildPostPage :: ServerT HtmlPage
-buildPostPage = do
-
-  return basePage
-
+buildPostPage = mzero

@@ -11,7 +11,6 @@ import Happstack.Server.ClientSession
 
 -- html pages
 import Html.Error
-import Html.Index
 
 import Session
 import State
@@ -39,6 +38,10 @@ main = do
     }
 
   oneMonth        = MaxAge $ 60 * 60 * 24 * 7 * 4
+
+--
+-- Start routing
+--
 
 mainRoute :: ServerT Response
 mainRoute = msum

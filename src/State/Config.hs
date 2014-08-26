@@ -23,3 +23,8 @@ data Config = Config
 makeLenses ''Config
 
 deriveSafeCopy 0 'base ''Config
+
+defaultConfig :: Config
+defaultConfig = Config
+  { _configDefaultVisibility = Private
+  }

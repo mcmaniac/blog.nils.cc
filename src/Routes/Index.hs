@@ -1,5 +1,7 @@
 module Routes.Index where
 
+import Control.Monad
+
 import Text.Blaze.Html
 
 -- local
@@ -9,6 +11,4 @@ import Html.Base
 import Html.Index
 
 buildIndexPage :: ServerT HtmlPage
-buildIndexPage = do
-
-  return basePage
+buildIndexPage = mzero
