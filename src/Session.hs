@@ -20,20 +20,11 @@ import State.Users
 type ServerT a = ClientSessionT SessionData AcidServerT a
 
 runServerT
-  :: (Key -> SessionConf)
-  -> ServerT a
-  -> ServerPart a
-runServerT sconf srvt = do
-  key  <- liftIO $ getDefaultKey
-  acid <- liftIO $ openLocalState emptyBlogState
-  runServerT' acid (sconf key) srvt
-
-runServerT'
   :: AcidState BlogState
   -> SessionConf
   -> ServerT a
   -> ServerPart a
-runServerT' acid sconf srvt =
+runServerT acid sconf srvt =
   runReaderT (withClientSessionT sconf srvt) acid
 
 --

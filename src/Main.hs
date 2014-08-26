@@ -5,6 +5,7 @@ import Control.Monad
 import Control.Monad.Error
 
 -- happstack package
+import Data.Acid
 import Happstack.Server
 import Happstack.Server.ClientSession
 
@@ -19,8 +20,12 @@ import Routes
 main :: IO ()
 main = do
 
-  simpleHTTP hsconf $ runServerT sessionconf $
-    mainRoute `catchError` internalServerErrorResponse
+  key  <- getDefaultKey
+  acid <- openLocalState emptyBlogState
+
+  simpleHTTP hsconf $
+    runServerT acid (sessionconf key) $
+      mainRoute `catchError` internalServerErrorResponse
 
  where
 
