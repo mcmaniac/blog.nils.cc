@@ -1,10 +1,11 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE TemplateHaskell #-}
+{-# OPTIONS -fno-warn-unused-do-bind #-}
 
 module Html.Base where
 
+import Data.Foldable
 import Data.Monoid
-import Control.Monad
 
 -- text package
 import Data.Text as Text
@@ -20,6 +21,10 @@ import qualified Text.Blaze.Html5.Attributes    as A
 -- happstack packages
 import Happstack.Server.Response
 
+-- i18n
+import Text.I18n
+import Text.Blaze.I18n
+
 -- our modules
 import Html.Helper
 
@@ -30,24 +35,32 @@ import Html.Helper
 type Link = (Text, Text, Text)
 
 data HtmlPage = HtmlPage
-  { _pageTitle   :: Text
-  , _pageName    :: Maybe Text
-  , _pageScripts :: [FilePath]
-  , _pageStyles  :: [FilePath]
-  , _pageLinks   :: [Link]
-  , _pageBody    :: Html
+  { _pageTitle    :: Text
+  , _pageName     :: Maybe Text
+  , _pageScripts  :: [FilePath]
+  , _pageStyles   :: [FilePath]
+  , _pageLinks    :: [Link]
+  , _pageHeader   :: Maybe Html
+  , _pageBody     :: Html
+  , _pageFooter   :: Maybe Html
   }
 
 makeLenses ''HtmlPage
 
 emptyPage :: HtmlPage
-emptyPage = HtmlPage "" Nothing [] [] [] mempty
+emptyPage = HtmlPage "" Nothing [] [] [] Nothing mempty Nothing
+
+localizePage :: L10n -> Locale -> HtmlPage -> HtmlPage
+localizePage l10n loc page = page &~ do
+  pageHeader %= fmap (localizeMarkup l10n loc)
+  pageBody   %=       localizeMarkup l10n loc
+  pageFooter %= fmap (localizeMarkup l10n loc)
 
 basePage :: HtmlPage
-basePage = emptyPage
-  & pageTitle   .~ "blog.nils.cc"
-  & pageStyles  .~ [ "base.css" ]
-  & pageLinks   .~ [ ubuntuFont  ]
+basePage = emptyPage &~ do
+  pageTitle  .= "blog.nils.cc"
+  pageStyles .= [ "base.css" ]
+  pageLinks  .= [ ubuntuFont  ]
  where
   ubuntuFont = ("text/css", "http://fonts.googleapis.com/css?family=Ubuntu", "stylesheet")
 
@@ -79,7 +92,14 @@ renderPage page = H.docTypeHtml $ do
 
   H.body $ do
 
-    page ^. pageBody
+    forM_ (page ^. pageHeader) $ \hdr -> do
+      H.div ! A.id "main-header" $ hdr
+
+    H.div ! A.id "main-body" $
+      page ^. pageBody
+
+    forM_ (page ^. pageFooter) $ \ftr -> do
+      H.div ! A.id "main-footer" $ ftr
 
 instance ToMessage HtmlPage where
   toContentType _ = toContentType (mempty :: Html)
@@ -95,3 +115,4 @@ input name ty labl = do
     toMarkup $ labl
     " "
     H.input ! A.type_ (toValue ty) ! A.name (toValue name)
+
