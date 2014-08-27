@@ -29,6 +29,8 @@ main = do
     putStrLn "Warning: Error parsing language files:"
     mapM_ print err
 
+  putStrLn $ "Starting server on " ++ (show $ port hsconf)
+
   simpleHTTP hsconf $
     runServerT acid (sessionconf key) $
       mainRoute l10n `catchError` internalServerErrorResponse

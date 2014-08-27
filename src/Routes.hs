@@ -38,7 +38,8 @@ pageRoute l10n = do
                ]
 
   loc <- getLocale
-  ok . toResponse . localizePage l10n loc =<< buildMainPage page
+
+  ok . toResponse =<< buildMainPage (setLocalization page l10n loc)
 
  where
   getLocale = msum

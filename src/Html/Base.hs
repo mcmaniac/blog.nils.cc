@@ -7,14 +7,17 @@ module Html.Base where
 import Data.Foldable
 import Data.Monoid
 
+import qualified Data.Map as Map
+
 -- text package
 import Data.Text as Text
 
 -- lens package
 import Control.Lens
+import Data.Text.Lens
 
 -- blaze-html package
-import Text.Blaze.Html (Html, (!), toMarkup, toValue)
+import Text.Blaze.Html (Html, (!), toValue)
 import qualified Text.Blaze.Html5               as H
 import qualified Text.Blaze.Html5.Attributes    as A
 
@@ -40,6 +43,8 @@ data HtmlPage = HtmlPage
   , _pageScripts  :: [FilePath]
   , _pageStyles   :: [FilePath]
   , _pageLinks    :: [Link]
+  , _pageLocale   :: Maybe Locale
+  , _pageL10n     :: L10n
   , _pageHeader   :: Maybe Html
   , _pageBody     :: Html
   , _pageFooter   :: Maybe Html
@@ -48,13 +53,23 @@ data HtmlPage = HtmlPage
 makeLenses ''HtmlPage
 
 emptyPage :: HtmlPage
-emptyPage = HtmlPage "" Nothing [] [] [] Nothing mempty Nothing
+emptyPage = HtmlPage
+  { _pageTitle = ""
+  , _pageName = Nothing
+  , _pageScripts = []
+  , _pageStyles = []
+  , _pageLinks = []
+  , _pageLocale = Nothing
+  , _pageL10n = Map.empty
+  , _pageHeader = Nothing
+  , _pageBody = mempty
+  , _pageFooter = Nothing
+  }
 
-localizePage :: L10n -> Locale -> HtmlPage -> HtmlPage
-localizePage l10n loc page = page &~ do
-  pageHeader %= fmap (localizeMarkup l10n loc)
-  pageBody   %=       localizeMarkup l10n loc
-  pageFooter %= fmap (localizeMarkup l10n loc)
+setLocalization :: HtmlPage -> L10n -> Locale -> HtmlPage
+setLocalization page l10n loc = page &~ do
+  pageLocale .= Just loc
+  pageL10n   .= l10n
 
 basePage :: HtmlPage
 basePage = emptyPage &~ do
@@ -66,13 +81,15 @@ basePage = emptyPage &~ do
 
 -- | Render a HtmlPage as Html
 renderPage :: HtmlPage -> Html
-renderPage page = H.docTypeHtml $ do
+renderPage page = localizeMarkup l10 loc $ H.docTypeHtml $ do
 
-  H.head $ do
+  H.head $ i18nContext "html-head" $ do
 
     H.title $ do
-      toMarkup $ page ^. pageTitle
-      toMarkup $ maybe "" (" - " `Text.append`) (page ^. pageName)
+      i18n $ page ^. pageTitle . _Text
+      maybe (return ()) `flip` (page ^? pageName . _Just . _Text) $ \name -> do
+        " - "
+        i18n name
 
     -- load javascript
     forM_ (page ^. pageScripts) $ \s ->
@@ -100,6 +117,9 @@ renderPage page = H.docTypeHtml $ do
 
     forM_ (page ^. pageFooter) $ \ftr -> do
       H.div ! A.id "main-footer" $ ftr
+ where
+  loc = page ^. pageLocale . non (Locale "en")
+  l10 = page ^. pageL10n
 
 instance ToMessage HtmlPage where
   toContentType _ = toContentType (mempty :: Html)
@@ -109,10 +129,11 @@ instance ToMessage HtmlPage where
 -- HTML helper
 --
 
-input :: String -> String -> Text -> Html
-input name ty labl = do
-  H.label $ do
-    toMarkup $ labl
-    " "
-    H.input ! A.type_ (toValue ty) ! A.name (toValue name)
+input :: String -> String -> Html -> Html
+input ty name lbl = do
+  H.label $ lbl
+  H.input ! A.type_ (toValue ty) ! A.name (toValue name)
 
+textInput, passInput :: String -> Html -> Html
+textInput = input "text"
+passInput = input "password"
