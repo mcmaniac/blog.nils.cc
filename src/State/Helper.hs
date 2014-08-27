@@ -7,6 +7,15 @@ import Control.Lens
 import Data.Typeable
 import Data.IxSet as IxS
 
+import Text.I18n
+
+--
+-- Some prism/lenses
+--
+
+locale :: Lens' String Locale
+locale = lens Locale (\_ (Locale s) -> s)
+
 --
 -- IxSet helper
 --

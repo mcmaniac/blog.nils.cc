@@ -2,3 +2,19 @@
 {
   font-family: Ubuntu;
 }
+
+/*
+ * Main body
+ *
+ */
+
+#main-body
+{
+  max-width: 1024px;
+  margin: 100px auto;
+}
+
+form label
+{
+  display: block;
+}

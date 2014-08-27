@@ -34,4 +34,5 @@ executable blog-nils-cc
     safecopy, acid-state,
     ixset,
     blaze-html,
+    i18n, blaze-i18n,
     lens

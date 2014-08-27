@@ -8,11 +8,13 @@ import Control.Lens
 -- happstack
 import Happstack.Server
 
+import Text.I18n
+
 -- local
 import Session
+import State
 
 import Html.Base
-import Html.Index
 
 import Routes.Header
 import Routes.Footer
@@ -26,10 +28,8 @@ import Routes.Post
 -- Html pages
 --
 
-pageRoute :: ServerT Response
-pageRoute = do
-
-  hdr_html <- buildHeaderHtml
+pageRoute :: L10n -> ServerT Response
+pageRoute l10n = do
 
   page <- msum [ buildInstallPage
                , buildIndexPage
@@ -37,15 +37,26 @@ pageRoute = do
                , buildPostPage
                ]
 
-  ftr_html <- buildFooterHtml
+  loc <- getLocale
+  ok . toResponse . localizePage l10n loc =<< buildMainPage page
 
-  ok $ toResponse $ page & pageBody .~ do
+ where
+  getLocale = msum
+    [ getSessionLocale          >>= maybe mzero return
+    , runQuery GetDefaultLocale >>= maybe mzero (return . Locale)
+    , return $ Locale "en"
+    ]
 
-    hdr_html
+buildMainPage :: HtmlPage -> ServerT HtmlPage
+buildMainPage page = do
 
-    page ^. pageBody
+  hdr <- maybe buildHeaderHtml return $ page ^. pageHeader
+  ftr <- maybe buildFooterHtml return $ page ^. pageFooter
 
-    ftr_html
+  return $ page &~ do
+    pageHeader .= Just hdr
+    pageFooter .= Just ftr
+
 
 --
 -- Ajax api

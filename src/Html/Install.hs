@@ -27,18 +27,18 @@ installPage muser = basePage
     installHtml muser
 
 installHtml :: Maybe User -> Html
-installHtml mu = do
+installHtml mu = H.div ! A.id "install" $ do
 
   H.h1 "Welcome!"
 
-  H.form ! A.action "/" ! A.method "post" $ do
+  H.div ! A.class_ "new-user" $ do
     case mu of
       Nothing -> newUserForm
       Just _  -> return ()
 
 newUserForm :: Html
 newUserForm = do
-  H.div ! A.class_ "new-user" $ do
+  H.form ! A.action "/" ! A.method "post" $ do
     H.p "Please create a new user:"
     input "username" "text" "Username:"
     input "password" "password" "Password:"

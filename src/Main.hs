@@ -9,6 +9,8 @@ import Data.Acid
 import Happstack.Server
 import Happstack.Server.ClientSession
 
+import Text.I18n.Po (L10n, getL10n)
+
 -- html pages
 import Html.Error
 
@@ -21,10 +23,15 @@ main = do
 
   key  <- getDefaultKey
   acid <- openLocalState emptyBlogState
+  (l10n,err) <- getL10n "lang"
+
+  when (not $ null err) $ do
+    putStrLn "Warning: Error parsing language files:"
+    mapM_ print err
 
   simpleHTTP hsconf $
     runServerT acid (sessionconf key) $
-      mainRoute `catchError` internalServerErrorResponse
+      mainRoute l10n `catchError` internalServerErrorResponse
 
  where
 
@@ -43,11 +50,11 @@ main = do
 -- Start routing
 --
 
-mainRoute :: ServerT Response
-mainRoute = msum
+mainRoute :: L10n -> ServerT Response
+mainRoute l10n = msum
   [ dir "static" $ serveDirectory DisableBrowsing ["index.html"] "static"
   , dir "api"    $ apiRoute
-  , pageRoute
+  , pageRoute l10n
   , notFoundResponse
   ]
 

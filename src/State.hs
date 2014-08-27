@@ -17,6 +17,8 @@ import Data.SafeCopy
 import Data.IxSet (empty)
 import Happstack.Server
 
+import Text.I18n
+
 -- local modules
 import State.Users
 import State.Posts
@@ -50,6 +52,9 @@ getUserById uid = view $ users . userAt uid
 getConfig :: Query BlogState (Maybe Config)
 getConfig = view config
 
+getDefaultLocale :: Query BlogState (Maybe String)
+getDefaultLocale = asks (^? config . _Just . configDefaultLocaleStr)
+
 --
 -- Update
 --
@@ -69,6 +74,7 @@ makeAcidic ''BlogState
   [ -- queries
     'getUserById
   , 'getConfig
+  , 'getDefaultLocale
     -- updates
   , 'setConfig
   , 'setDefaultVisibility
